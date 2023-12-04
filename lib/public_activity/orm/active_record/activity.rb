@@ -26,6 +26,8 @@ module PublicActivity
         # Define polymorphic association to the parent
         belongs_to :trackable, polymorphic: true
 
+        before_create :set_uuid
+
         case ::ActiveRecord::VERSION::MAJOR
         when 6..7
           with_options(optional: true) do
@@ -39,7 +41,7 @@ module PublicActivity
         # Serialize parameters Hash
         begin
           if table_exists?
-            serialize :parameters, Hash unless %i[json jsonb hstore].include?(columns_hash['parameters'].type)
+            serialize :parameters, JSON
           else
             warn("[WARN] table #{name} doesn't exist. Skipping PublicActivity::Activity#parameters's serialization")
           end
@@ -55,6 +57,11 @@ module PublicActivity
 
         if ::ActiveRecord::VERSION::MAJOR < 4 || defined?(ProtectedAttributes)
           attr_accessible :key, :owner, :parameters, :recipient, :trackable
+        end
+
+        def set_uuid
+          return unless self.has_attribute?(:uuid)
+          self.uuid = SecureRandom.uuid unless self.uuid.present?
         end
       end
     end
