@@ -8,7 +8,7 @@ class CreateActivities < ActiveRecord::Migration[5.0]
       t.belongs_to :owner, polymorphic: true
       t.string :uuid, limit: 36, null: false
       t.string :key
-      t.text :parameters
+      t.json :parameters
       t.belongs_to :recipient, polymorphic: true
       t.index :uuid, unique: true
       t.timestamps
